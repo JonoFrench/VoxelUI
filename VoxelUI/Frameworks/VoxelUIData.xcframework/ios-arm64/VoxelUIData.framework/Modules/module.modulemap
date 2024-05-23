@@ -1,0 +1,6 @@
+framework module VoxelUIData {
+  umbrella header "VoxelUIData.h"
+  export *
+
+  module * { export * }
+}
