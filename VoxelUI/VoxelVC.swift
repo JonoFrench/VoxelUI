@@ -10,17 +10,17 @@ import VoxelUIData
 
 class VoxelVC: UIViewController {
     
-    let depth = 16
+    let depth = 20
     var width = 60
     var constraintArray = [[NSLayoutConstraint]]()
     var columnArray = [[UIView]]()
     var depthArray = [UIView]()
     var rate = 0
-//    var controls = Controls()
     
-    let alphaDepth:[CGFloat] = [1.0,0.95,0.90,0.85,0.80,0.75,0.70,0.65,0.60,0.56,0.54,0.52,0.50,0.48,0.46,0.44,0.42,0.40,0.38,0.36]
-    let heightDepth:[CGFloat] = [0.5,1.2,1.4,1.6,1.8,2.0,2.2,2.4,2.6,2.8,3.0,3.2,3.4,3.6,3.8,4.0]
-    
+    let alphaDepth:[CGFloat] = [1.0,0.98,0.96,0.94,0.92,0.90,0.88,0.86,0.84,0.82,0.80,0.78,0.76,0.74,0.72,0.70,0.68,0.66,0.64,0.62,0.60,0.58]
+//    [1.0,0.95,0.90,0.85,0.80,0.75,0.70,0.65,0.60,0.56,0.54,0.52,0.50,0.48,0.46,0.44,0.42,0.40,0.38,0.36,0.34,0.32]
+    let heightDepth:[CGFloat] = [0.5,1.2,1.4,1.6,1.8,2.0,2.2,2.4,2.6,2.8,3.0,3.2,3.4,3.6,3.8,4.0,4.2,4.4,4.6,4.8,5.0]
+    let fixedHeight = 3.0
         var xPos = 256.0
         var yPos = 0.0
         let speed = 4
@@ -156,9 +156,13 @@ class VoxelVC: UIViewController {
     
     func moveData() {
         if let heightData = getPointsWithAngle(data: VoxelUIData.voxelHeight.heightData, angle: angle, initialStartX: xPos, initialStartY: yPos, moveDistance: 1) {
+            let maxHeight = Double(heightData[0].max()!)
             for (rowIndex,row) in heightData.enumerated() {
                 for (colIndex,height) in row.enumerated() {
-                    constraintArray[rowIndex][colIndex].constant = CGFloat(height) * heightDepth[rowIndex] + 60
+                    var heightConstant = CGFloat(height) * heightDepth[rowIndex] - maxHeight + 40
+                    if heightConstant < 0.0 {heightConstant = 0.0}
+                    constraintArray[rowIndex][colIndex].constant = heightConstant
+                    //constraintArray[rowIndex][colIndex].constant = CGFloat(height) * heightDepth[rowIndex] + 60
                 }
             }
         } else {
@@ -192,18 +196,21 @@ class VoxelVC: UIViewController {
     }
     
     func setupDepth() {
-        for _ in 0...depth - 1 {
+        for i in stride(from: depth, to: 0, by: -1) {
             let view = UIView()
             view.backgroundColor = .clear
-            view.frame = viewPort.frame
-            view.frame.origin = CGPoint(x: 0, y: 0)
+            var vSize = viewPort.frame.size
+            let vWidth = CGFloat(i * 10)
+            vSize.width = vSize.width + vWidth
+            view.frame.size = vSize
+            view.frame.origin = CGPoint(x: -(vWidth / 2), y: 0)
             depthArray.append(view)
         }
     }
     
     func setUpColumns() {
-        let viewWidth = Double(viewPort.frame.width / CGFloat(width))
         for d in 0...depth-1 {
+            let viewWidth = Double(depthArray[d].frame.width / CGFloat(width))
             var lineArray = [UIView]()
             var lineConstraint = [NSLayoutConstraint]()
             for i in 0...width-1 {
